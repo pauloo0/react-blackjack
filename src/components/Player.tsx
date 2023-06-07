@@ -1,7 +1,9 @@
 import React from 'react'
+import { IDeck } from '../utils/deck'
 
 interface PlayerProps {
   name: string
+  cards: IDeck[]
 }
 
 const Player: React.FC<PlayerProps> = (props) => {
