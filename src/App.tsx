@@ -1,57 +1,6 @@
-// import React, { useState } from 'react'
-// import { DECK, IDeck } from './utils/deck'
-
-// const NUMBER_OF_PLAYERS = 4
-
-// const App: React.FC = () => {
-//   const players = []
-
-//   const [dealerCards, setDealerCards] = useState<IDeck[]>([])
-//   const [playerCards, setPlayerCards] = useState<IDeck[]>([])
-
-//   for (let i = 0; i < NUMBER_OF_PLAYERS; i++) {
-//     players.push(`Player ${i + 1}`)
-//   }
-
-//   const dealCards = () => {
-//     // deal 2 cards for the dealer
-//     const dealerCards: IDeck[] = DECK.sort(() => 0.5 - Math.random()).slice(
-//       0,
-//       2
-//     )
-//     console.log(dealerCards)
-//     setDealerCards(dealerCards)
-//   }
-
-//   return (
-//     <div className='flex flex-col items-center justify-between h-screen bg-slate-200'>
-//       <header className='flex items-center justify-center w-4/5 mb-10'>
-//         <Dealer cards={dealerCards} />
-//         <button
-//           className='absolute px-6 py-2 text-white rounded-lg bg-cyan-900 right-10 top-5 disabled:bg-slate-700'
-//           onClick={dealCards}
-//           disabled={
-//             dealerCards.length > 0 || playerCards.length > 0 ? true : false
-//           }
-//         >
-//           Deal cards
-//         </button>
-//       </header>
-//       <main className={`grid grid-cols-4 gap-4 mb-10 w-4/5`}>
-//         {players.map((player, index) => {
-//           return <Player key={index} name={player} cards={playerCards} />
-//         })}
-//       </main>
-//     </div>
-//   )
-// }
-
-// export default App
-
 import React, { useState } from 'react'
 import Dealer from './components/Dealer'
-import Player from './components/Player'
-import { PlayerProps } from './components/Player'
+import Player, { PlayerProps } from './components/Player'
 import { DeckCard, deck } from './utils/deck'
 
 const App: React.FC = () => {
@@ -68,6 +17,13 @@ const App: React.FC = () => {
       isCpu: false,
       cards: [],
       balance: 100,
+      actions: {
+        hit,
+        stand,
+        double,
+        split,
+        surrender,
+      },
     })
     for (let i = 0; i < 4 - (players.length + 1); i++) {
       newPlayers.push({
@@ -76,6 +32,13 @@ const App: React.FC = () => {
         isCpu: true,
         cards: [],
         balance: 100,
+        actions: {
+          hit,
+          stand,
+          double,
+          split,
+          surrender,
+        },
       })
     }
     setPlayers(newPlayers)
@@ -115,6 +78,47 @@ const App: React.FC = () => {
     return randomCard
   }
 
+  const hit = (id: number) => {
+    const player = players.find((p) => p.id === id)
+    if (!player) return false
+
+    if (computeScore(player.cards) < 21) {
+      dealCards(id)
+    }
+  }
+
+  const stand = (id: number) => {
+    console.log('stand', id)
+  }
+
+  const double = (id: number) => {
+    console.log('double', id)
+  }
+
+  const split = (id: number) => {
+    console.log('split', id)
+  }
+
+  const surrender = (id: number) => {
+    console.log('surrender', id)
+  }
+
+  const computeScore = (cards: DeckCard[] = []) => {
+    let score = 0
+
+    cards.forEach((card) => {
+      if (card.value === 'A' && score + 11 > 21) {
+        score += 1
+      } else if (card.value === 'A' && score + 11 <= 21) {
+        score += 11
+      } else {
+        score += card.points
+      }
+    })
+
+    return score
+  }
+
   return (
     <div className='flex flex-col items-center justify-between h-screen bg-slate-200'>
       {!gameStart ? (
@@ -142,14 +146,20 @@ const App: React.FC = () => {
           <main className={`grid grid-cols-4 gap-4 mb-10 w-4/5`}>
             {players.map((player, index) => {
               return (
-                <Player
+                <div
                   key={index}
-                  id={player.id}
-                  name={player.name}
-                  cards={player.cards}
-                  isCpu={player.isCpu}
-                  balance={player.balance}
-                />
+                  className='flex flex-col items-start justify-between w-full'
+                >
+                  <Player
+                    key={player.id}
+                    id={player.id}
+                    name={player.name}
+                    cards={player.cards}
+                    isCpu={player.isCpu}
+                    balance={player.balance}
+                    actions={{ hit, stand, double, split, surrender }}
+                  />
+                </div>
               )
             })}
           </main>
