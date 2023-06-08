@@ -1,9 +1,9 @@
 import React from 'react'
 import Card from './Card'
-import { IDeck } from '../utils/deck'
+import { DeckCard } from '../utils/deck'
 
-interface DealerProps {
-  cards: IDeck[]
+export interface DealerProps {
+  cards: DeckCard[]
 }
 
 const Dealer: React.FC<DealerProps> = (props) => {
@@ -16,7 +16,7 @@ const Dealer: React.FC<DealerProps> = (props) => {
         {cards.map((card, index) => (
           <Card
             key={index}
-            card={card.name}
+            card={card.value}
             facingUp={index === 0 ? true : false}
           />
         ))}
