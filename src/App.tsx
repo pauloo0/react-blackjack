@@ -6,6 +6,7 @@ import { DeckCard, deck } from './utils/deck'
 const App: React.FC = () => {
   const [gameStart, setGameStart] = useState<boolean>(false)
   const [playerName, setPlayerName] = useState<string>('Paulo')
+  const [playerBet, setPlayerBet] = useState<number>(0)
   const [players, setPlayers] = useState<PlayerProps[]>([])
   const [dealerCards, setDealerCards] = useState<DeckCard[]>([])
 
@@ -17,6 +18,7 @@ const App: React.FC = () => {
       isCpu: false,
       cards: [],
       balance: 100,
+      bet: playerBet,
       actions: {
         hit,
         stand,
@@ -32,6 +34,7 @@ const App: React.FC = () => {
         isCpu: true,
         cards: [],
         balance: 100,
+        bet: Math.floor(Math.random() * 100) + 1,
         actions: {
           hit,
           stand,
@@ -131,6 +134,14 @@ const App: React.FC = () => {
             onChange={(e) => setPlayerName(e.target.value)}
             value={playerName}
           />
+          <input
+            type='text'
+            pattern='[0-9]*'
+            value={playerBet}
+            onChange={(e) =>
+              setPlayerBet(Number(e.target.value.replace(/[^0-9]/g, '')))
+            }
+          />
           <button
             className='px-6 py-2 text-white rounded-lg bg-cyan-900 disabled:bg-slate-700'
             onClick={startGame}
@@ -157,6 +168,7 @@ const App: React.FC = () => {
                     cards={player.cards}
                     isCpu={player.isCpu}
                     balance={player.balance}
+                    bet={player.bet}
                     actions={{ hit, stand, double, split, surrender }}
                   />
                 </div>

@@ -16,6 +16,7 @@ export interface PlayerProps {
   cards?: DeckCard[]
   isCpu: boolean
   balance: number
+  bet: number
   actions: PlayerActions
 }
 
@@ -23,38 +24,38 @@ const Player: React.FC<PlayerProps> = (props) => {
   const { hit, stand, double, split, surrender } = props.actions
 
   return (
-    <div className='cols-span-1 flex items-center justify-between w-full space-x-4'>
+    <div className='flex items-center justify-between w-full space-x-4 cols-span-1'>
       <section
         className={`${
           props.isCpu && 'hidden'
         } grid grid-cols-1 gap-1 text-white cols-span-1`}
       >
         <button
-          className='rounded-full w-8 h-8 bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
           onClick={() => hit(props.id)}
         >
           +
         </button>
         <button
-          className='rounded-full w-8 h-8 bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
           onClick={() => stand(props.id)}
         >
           |
         </button>
         <button
-          className='rounded-full w-8 h-8 bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
           onClick={() => double(props.id)}
         >
           x2
         </button>
         <button
-          className='rounded-full w-8 h-8 bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
           onClick={() => split(props.id)}
         >
           /
         </button>
         <button
-          className='rounded-full w-8 h-8 bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
           onClick={() => surrender(props.id)}
         >
           FF
