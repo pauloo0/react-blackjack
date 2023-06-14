@@ -3,109 +3,103 @@ import Dealer from './components/Dealer'
 import Player, { PlayerProps } from './components/Player'
 import { DeckCard, deck } from './utils/deck'
 
+const defaultPlayer: PlayerProps = {
+  name: '',
+  balance: 100,
+  bet: 0,
+  score: 0,
+  cards: [],
+  actions: {
+    hit: () => {
+      console.log('hit')
+    },
+    stand: () => {
+      console.log('stand')
+    },
+    double: () => {
+      console.log('double')
+    },
+    surrender: () => {
+      console.log('surrender')
+    },
+  },
+}
+
 const App: React.FC = () => {
   const [gameStart, setGameStart] = useState<boolean>(false)
+  const [roundStarted, setRoundStarted] = useState<boolean>(false)
+  const [player, setPlayer] = useState<PlayerProps>(defaultPlayer)
   const [playerName, setPlayerName] = useState<string>('Paulo')
   const [playerBet, setPlayerBet] = useState<number>(0)
-  const [players, setPlayers] = useState<PlayerProps[]>([])
   const [dealerCards, setDealerCards] = useState<DeckCard[]>([])
 
   const startGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!playerName || !playerBet) {
+      alert('Please enter your name and bet amount.')
+      return false
+    }
 
-    const newPlayers = [...players]
-    newPlayers.push({
-      id: 1,
+    const newPlayer: PlayerProps = {
       name: playerName,
-      isCpu: false,
-      cards: [],
       balance: 100 - playerBet,
       bet: playerBet,
+      score: 0,
+      cards: [],
       actions: {
         hit,
         stand,
         double,
         surrender,
       },
-    })
-    for (let i = 0; i < 4 - (players.length + 1); i++) {
-      const betAmount = Math.floor(Math.random() * 100) + 1
-      newPlayers.push({
-        id: i + 2,
-        name: `CPU ${i + 1}`,
-        isCpu: true,
-        cards: [],
-        balance: 100 - betAmount,
-        bet: betAmount,
-        actions: {
-          hit,
-          stand,
-          double,
-          surrender,
-        },
-      })
     }
-    setPlayers(newPlayers)
-    setGameStart(true)
 
-    for (let i = 0; i < 2; i++) {
-      newPlayers.forEach((player) => {
-        dealCards(player.id)
-      })
-      dealCards(-1) // Deal to dealer
-    }
+    setPlayer(newPlayer)
+    setGameStart(true)
   }
 
-  const dealCards = (playerId: number) => {
-    const randomCard = shuffleDeck()
-
-    if (playerId === -1) {
-      setDealerCards((prevCards) => [...prevCards, randomCard])
-    } else {
-      setPlayers((prevPlayers) => {
-        return prevPlayers.map((player) => {
-          const playerCards = player.cards || []
-          if (player.id === playerId) {
-            return {
-              ...player,
-              cards: [...playerCards, randomCard],
-            }
-          }
-          return player
-        })
-      })
+  const dealCards = () => {
+    for (let i = 0; i < 4; i++) {
+      const randomCard = shuffleDeck()
+      if (i % 2 === 0) {
+        setPlayer((prevPlayer) => ({
+          ...prevPlayer,
+          cards: [...prevPlayer.cards, randomCard],
+        }))
+        computeScore(player.cards, player.score)
+      } else {
+        setDealerCards((prevState) => [...prevState, randomCard])
+      }
     }
   }
 
   const shuffleDeck = () => {
-    const randomCard = deck[Math.floor(Math.random() * deck.length)]
-    return randomCard
+    return deck[Math.floor(Math.random() * deck.length)]
   }
 
-  const hit = (id: number) => {
-    const player = players.find((p) => p.id === id)
-    if (!player) return false
-
-    if (computeScore(player.cards) < 21) {
-      dealCards(id)
+  const hit = () => {
+    if (player.score < 21) {
+      const randomCard = shuffleDeck()
+      setPlayer((prevPlayer) => ({
+        ...prevPlayer,
+        cards: [...prevPlayer.cards, randomCard],
+      }))
     }
   }
 
-  const stand = (id: number) => {
-    console.log('stand', id)
+  const stand = () => {
+    console.log('stand')
   }
 
-  const double = (id: number) => {
-    console.log('double', id)
+  const double = () => {
+    console.log('double')
   }
 
-  const surrender = (id: number) => {
-    console.log('surrender', id)
+  const surrender = () => {
+    console.log('surrender')
   }
 
-  const computeScore = (cards: DeckCard[] = []) => {
-    let score = 0
-
+  const computeScore = (cards: DeckCard[] = [], score: number) => {
     cards.forEach((card) => {
       if (card.value === 'A' && score + 11 > 21) {
         score += 1
@@ -117,6 +111,11 @@ const App: React.FC = () => {
     })
 
     return score
+  }
+
+  const handleRound = () => {
+    dealCards()
+    setRoundStarted(true)
   }
 
   return (
@@ -167,26 +166,23 @@ const App: React.FC = () => {
           <header className='flex items-center justify-center w-4/5 mb-10'>
             <Dealer cards={dealerCards} />
           </header>
-          <main className={`grid grid-cols-4 gap-4 mb-10 w-4/5`}>
-            {players.map((player, index) => {
-              return (
-                <div
-                  key={index}
-                  className='flex flex-col items-start justify-between w-full'
-                >
-                  <Player
-                    key={player.id}
-                    id={player.id}
-                    name={player.name}
-                    cards={player.cards}
-                    isCpu={player.isCpu}
-                    balance={player.balance}
-                    bet={player.bet}
-                    actions={{ hit, stand, double, surrender }}
-                  />
-                </div>
-              )
-            })}
+          {!roundStarted && (
+            <button
+              className='p-3 tracking-wide text-white bg-green-700 rounded-lg hover:bg-green-600'
+              onClick={handleRound}
+            >
+              Start round
+            </button>
+          )}
+          <main className='grid w-4/5 grid-cols-2 gap-2 mb-10'>
+            <Player
+              name={player.name}
+              cards={player.cards}
+              balance={player.balance}
+              bet={playerBet}
+              score={player.score}
+              actions={{ hit, stand, double, surrender }}
+            />
           </main>
         </>
       )}

@@ -3,19 +3,18 @@ import { DeckCard } from '../utils/deck'
 import Card from './Card'
 
 interface PlayerActions {
-  hit: (id: number) => void
-  stand: (id: number) => void
-  double: (id: number) => void
-  surrender: (id: number) => void
+  hit: () => void
+  stand: () => void
+  double: () => void
+  surrender: () => void
 }
 
 export interface PlayerProps {
-  id: number
   name: string
-  cards?: DeckCard[]
-  isCpu: boolean
+  cards: DeckCard[]
   balance: number
   bet: number
+  score: number
   actions: PlayerActions
 }
 
@@ -24,32 +23,28 @@ const Player: React.FC<PlayerProps> = (props) => {
 
   return (
     <div className='flex items-center justify-between w-full space-x-4 cols-span-1'>
-      <section
-        className={`${
-          props.isCpu && 'hidden'
-        } grid grid-cols-1 gap-1 text-white cols-span-1`}
-      >
+      <section className='grid grid-cols-1 gap-1 text-white cols-span-1'>
         <button
           className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
-          onClick={() => hit(props.id)}
+          onClick={hit}
         >
           +
         </button>
         <button
           className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
-          onClick={() => stand(props.id)}
+          onClick={stand}
         >
           |
         </button>
         <button
           className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
-          onClick={() => double(props.id)}
+          onClick={double}
         >
           x2
         </button>
         <button
           className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
-          onClick={() => surrender(props.id)}
+          onClick={surrender}
         >
           FF
         </button>
@@ -60,7 +55,9 @@ const Player: React.FC<PlayerProps> = (props) => {
             <Card key={index} card={card.value} facingUp={true} />
           ))}
         </div>
-        <h1>{props.name}</h1>
+        <h1>
+          {props.name} <span>({props.score} points)</span>
+        </h1>
         <div className='flex items-center justify-start w-full space-x-4'>
           <p className='text-sm'>{props.balance} €</p>
           <p className='p-2 text-sm font-bold text-white bg-red-700 rounded-full'>
