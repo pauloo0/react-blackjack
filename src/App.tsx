@@ -10,36 +10,37 @@ const App: React.FC = () => {
   const [players, setPlayers] = useState<PlayerProps[]>([])
   const [dealerCards, setDealerCards] = useState<DeckCard[]>([])
 
-  const startGame = () => {
+  const startGame = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
     const newPlayers = [...players]
     newPlayers.push({
       id: 1,
       name: playerName,
       isCpu: false,
       cards: [],
-      balance: 100,
+      balance: 100 - playerBet,
       bet: playerBet,
       actions: {
         hit,
         stand,
         double,
-        split,
         surrender,
       },
     })
     for (let i = 0; i < 4 - (players.length + 1); i++) {
+      const betAmount = Math.floor(Math.random() * 100) + 1
       newPlayers.push({
         id: i + 2,
         name: `CPU ${i + 1}`,
         isCpu: true,
         cards: [],
-        balance: 100,
-        bet: Math.floor(Math.random() * 100) + 1,
+        balance: 100 - betAmount,
+        bet: betAmount,
         actions: {
           hit,
           stand,
           double,
-          split,
           surrender,
         },
       })
@@ -98,10 +99,6 @@ const App: React.FC = () => {
     console.log('double', id)
   }
 
-  const split = (id: number) => {
-    console.log('split', id)
-  }
-
   const surrender = (id: number) => {
     console.log('surrender', id)
   }
@@ -125,30 +122,46 @@ const App: React.FC = () => {
   return (
     <div className='flex flex-col items-center justify-between h-screen bg-slate-200'>
       {!gameStart ? (
-        <div className='flex flex-col items-center justify-center h-screen'>
+        <form
+          className='flex flex-col items-center justify-center h-screen'
+          onSubmit={(e) => startGame(e)}
+        >
           <h1 className='mb-4 text-3xl font-bold'>Welcome to Blackjack!</h1>
-          <input
-            className='px-4 py-2 mb-4 border rounded-lg shadow border-slate-200'
-            type='text'
-            placeholder='Enter your name'
-            onChange={(e) => setPlayerName(e.target.value)}
-            value={playerName}
-          />
-          <input
-            type='text'
-            pattern='[0-9]*'
-            value={playerBet}
-            onChange={(e) =>
-              setPlayerBet(Number(e.target.value.replace(/[^0-9]/g, '')))
-            }
-          />
+          <div className='flex flex-col items-start justify-center'>
+            <label htmlFor='playerName'>Name</label>
+            <input
+              className='px-3 py-1 mb-2 border rounded-lg shadow border-slate-200'
+              type='text'
+              name='playerName'
+              id='playerName'
+              placeholder='Enter your name'
+              onChange={(e) => setPlayerName(e.target.value)}
+              onFocus={(e) => e.target.select()}
+              value={playerName}
+            />
+          </div>
+          <div className='flex flex-col items-start justify-center'>
+            <label htmlFor='playerBet'>Your bet</label>
+            <input
+              className='px-3 py-1 mb-4 border rounded-lg shadow border-slate-200'
+              type='text'
+              name='playerBet'
+              id='playerBet'
+              pattern='[0-9]*'
+              value={playerBet}
+              onChange={(e) =>
+                setPlayerBet(Number(e.target.value.replace(/[^0-9]/g, '')))
+              }
+              onFocus={(e) => e.target.select()}
+            />
+          </div>
           <button
+            type='submit'
             className='px-6 py-2 text-white rounded-lg bg-cyan-900 disabled:bg-slate-700'
-            onClick={startGame}
           >
             Start game
           </button>
-        </div>
+        </form>
       ) : (
         <>
           <header className='flex items-center justify-center w-4/5 mb-10'>
@@ -169,7 +182,7 @@ const App: React.FC = () => {
                     isCpu={player.isCpu}
                     balance={player.balance}
                     bet={player.bet}
-                    actions={{ hit, stand, double, split, surrender }}
+                    actions={{ hit, stand, double, surrender }}
                   />
                 </div>
               )

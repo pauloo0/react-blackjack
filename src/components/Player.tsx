@@ -6,7 +6,6 @@ interface PlayerActions {
   hit: (id: number) => void
   stand: (id: number) => void
   double: (id: number) => void
-  split: (id: number) => void
   surrender: (id: number) => void
 }
 
@@ -21,7 +20,7 @@ export interface PlayerProps {
 }
 
 const Player: React.FC<PlayerProps> = (props) => {
-  const { hit, stand, double, split, surrender } = props.actions
+  const { hit, stand, double, surrender } = props.actions
 
   return (
     <div className='flex items-center justify-between w-full space-x-4 cols-span-1'>
@@ -50,12 +49,6 @@ const Player: React.FC<PlayerProps> = (props) => {
         </button>
         <button
           className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
-          onClick={() => split(props.id)}
-        >
-          /
-        </button>
-        <button
-          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
           onClick={() => surrender(props.id)}
         >
           FF
@@ -68,7 +61,12 @@ const Player: React.FC<PlayerProps> = (props) => {
           ))}
         </div>
         <h1>{props.name}</h1>
-        <p>{props.balance} €</p>
+        <div className='flex items-center justify-start w-full space-x-4'>
+          <p className='text-sm'>{props.balance} €</p>
+          <p className='p-2 text-sm font-bold text-white bg-red-700 rounded-full'>
+            {props.bet}
+          </p>
+        </div>
       </section>
     </div>
   )
