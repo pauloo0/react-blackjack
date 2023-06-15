@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Dealer from './components/Dealer'
 import Player, { PlayerProps } from './components/Player'
 import { DeckCard, deck } from './utils/deck'
@@ -33,6 +33,12 @@ const App: React.FC = () => {
   const [playerBet, setPlayerBet] = useState<number>(0)
   const [dealerCards, setDealerCards] = useState<DeckCard[]>([])
 
+  useEffect(() => {
+    if (player.score > 21) {
+      alert('Bust!')
+    }
+  }, [player.cards])
+
   const startGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!playerName || !playerBet) {
@@ -65,8 +71,8 @@ const App: React.FC = () => {
         setPlayer((prevPlayer) => ({
           ...prevPlayer,
           cards: [...prevPlayer.cards, randomCard],
+          score: computeScore(randomCard, prevPlayer.score),
         }))
-        computeScore(player.cards, player.score)
       } else {
         setDealerCards((prevState) => [...prevState, randomCard])
       }
@@ -80,9 +86,12 @@ const App: React.FC = () => {
   const hit = () => {
     if (player.score < 21) {
       const randomCard = shuffleDeck()
+      const computedScore = computeScore(randomCard, player.score)
+
       setPlayer((prevPlayer) => ({
         ...prevPlayer,
         cards: [...prevPlayer.cards, randomCard],
+        score: computedScore,
       }))
     }
   }
@@ -99,18 +108,18 @@ const App: React.FC = () => {
     console.log('surrender')
   }
 
-  const computeScore = (cards: DeckCard[] = [], score: number) => {
-    cards.forEach((card) => {
-      if (card.value === 'A' && score + 11 > 21) {
-        score += 1
-      } else if (card.value === 'A' && score + 11 <= 21) {
-        score += 11
-      } else {
-        score += card.points
-      }
-    })
+  const computeScore = (card: DeckCard, score: number) => {
+    let points: number
 
-    return score
+    if (card.value === 'A' && score + 11 > 21) {
+      points = 1
+    } else if (card.value === 'A' && score + 11 <= 21) {
+      points = 11
+    } else {
+      points = card.points
+    }
+
+    return (score += points)
   }
 
   const handleRound = () => {
