@@ -3,7 +3,7 @@ import { DeckCard } from '../utils/deck'
 import Card from './Card'
 
 interface PlayerActions {
-  hit: () => void
+  hit: (id: number) => void
   stand: () => void
   double: () => void
   surrender: () => void
@@ -16,35 +16,40 @@ export interface PlayerProps {
   bet: number
   score: number
   actions: PlayerActions
+  dealerTurn: boolean
 }
 
 const Player: React.FC<PlayerProps> = (props) => {
   const { hit, stand, double, surrender } = props.actions
 
   return (
-    <div className='flex items-center justify-between w-full space-x-4 cols-span-1'>
+    <div className='flex items-center justify-center w-full space-x-4 cols-span-1'>
       <section className='grid grid-cols-1 gap-1 text-white cols-span-1'>
         <button
-          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
-          onClick={hit}
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800 disabled:bg-slate-700'
+          onClick={() => hit(1)}
+          disabled={!props.dealerTurn}
         >
           +
         </button>
         <button
-          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800 disabled:bg-slate-700'
           onClick={stand}
+          disabled={!props.dealerTurn}
         >
           |
         </button>
         <button
-          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800 disabled:bg-slate-700'
           onClick={double}
+          disabled={!props.dealerTurn}
         >
           x2
         </button>
         <button
-          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800'
+          className='w-8 h-8 rounded-full bg-cyan-900 hover:bg-cyan-800 disabled:bg-slate-700'
           onClick={surrender}
+          disabled={!props.dealerTurn}
         >
           FF
         </button>
@@ -56,7 +61,10 @@ const Player: React.FC<PlayerProps> = (props) => {
           ))}
         </div>
         <h1>
-          {props.name} <span>({props.score} points)</span>
+          {props.name}{' '}
+          <span>
+            ({props.score === 21 ? 'Blackjack' : `${props.score} points`})
+          </span>
         </h1>
         <div className='flex items-center justify-start w-full space-x-4'>
           <p className='text-sm'>{props.balance} €</p>

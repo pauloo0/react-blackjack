@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Dealer from './components/Dealer'
+import Dealer, { DealerProps } from './components/Dealer'
 import Player, { PlayerProps } from './components/Player'
 import { DeckCard, deck } from './utils/deck'
 
@@ -23,21 +23,53 @@ const defaultPlayer: PlayerProps = {
       console.log('surrender')
     },
   },
+  dealerTurn: false,
+}
+
+const defaultDealer: DealerProps = {
+  cards: [],
+  score: 0,
+  dealerTurn: false,
 }
 
 const App: React.FC = () => {
   const [gameStart, setGameStart] = useState<boolean>(false)
   const [roundStarted, setRoundStarted] = useState<boolean>(false)
+  const [dealer, setDealer] = useState<DealerProps>(defaultDealer)
   const [player, setPlayer] = useState<PlayerProps>(defaultPlayer)
   const [playerName, setPlayerName] = useState<string>('Paulo')
-  const [playerBet, setPlayerBet] = useState<number>(0)
-  const [dealerCards, setDealerCards] = useState<DeckCard[]>([])
+  const [playerBet, setPlayerBet] = useState<number>(10)
+  const [dealerTurn, setDealerTurn] = useState<boolean>(false)
 
   useEffect(() => {
     if (player.score > 21) {
       alert('Bust!')
+    } else if (player.score === 21) {
+      setDealerTurn(true)
     }
-  }, [player.cards])
+  }, [player.cards, player.score])
+
+  useEffect(() => {
+    if (dealerTurn) {
+      alert('Dealer turn')
+
+      if (17 < dealer.score && dealer.score < 21) {
+        alert(`Dealer stands!\n${computeWinner(player.score, dealer.score)}`)
+      } else if (dealer.score === 21) {
+        alert(
+          `Dealer blackjack!\n${computeWinner(player.score, dealer.score)}}`
+        )
+      } else if (dealer.score === 17) {
+        const foundAce = dealer.cards.find((card) => card.value === 'A')
+        if (foundAce) {
+          setDealer((prevDealer) => ({
+            ...prevDealer,
+            score: 7,
+          }))
+        }
+      }
+    }
+  }, [dealerTurn, dealer.score])
 
   const startGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -58,6 +90,7 @@ const App: React.FC = () => {
         double,
         surrender,
       },
+      dealerTurn: false,
     }
 
     setPlayer(newPlayer)
@@ -74,7 +107,11 @@ const App: React.FC = () => {
           score: computeScore(randomCard, prevPlayer.score),
         }))
       } else {
-        setDealerCards((prevState) => [...prevState, randomCard])
+        setDealer((prevDealer) => ({
+          ...prevDealer,
+          cards: [...prevDealer.cards, randomCard],
+          score: computeScore(randomCard, prevDealer.score),
+        }))
       }
     }
   }
@@ -83,21 +120,34 @@ const App: React.FC = () => {
     return deck[Math.floor(Math.random() * deck.length)]
   }
 
-  const hit = () => {
-    if (player.score < 21) {
-      const randomCard = shuffleDeck()
-      const computedScore = computeScore(randomCard, player.score)
+  const hit = (id: number) => {
+    if (id === 1) {
+      if (player.score < 21) {
+        const randomCard = shuffleDeck()
+        const computedScore = computeScore(randomCard, player.score)
 
-      setPlayer((prevPlayer) => ({
-        ...prevPlayer,
-        cards: [...prevPlayer.cards, randomCard],
-        score: computedScore,
-      }))
+        setPlayer((prevPlayer) => ({
+          ...prevPlayer,
+          cards: [...prevPlayer.cards, randomCard],
+          score: computedScore,
+        }))
+      }
+    } else {
+      if (dealer.score < 21) {
+        const randomCard = shuffleDeck()
+        const computedScore = computeScore(randomCard, dealer.score)
+
+        setDealer((prevDealer) => ({
+          ...prevDealer,
+          cards: [...prevDealer.cards, randomCard],
+          score: computedScore,
+        }))
+      }
     }
   }
 
   const stand = () => {
-    console.log('stand')
+    setDealerTurn(true)
   }
 
   const double = () => {
@@ -120,6 +170,16 @@ const App: React.FC = () => {
     }
 
     return (score += points)
+  }
+
+  const computeWinner = (playerScore: number, dealerScore: number) => {
+    if (playerScore > dealerScore) {
+      return 'Player wins!'
+    } else if (playerScore < dealerScore) {
+      return 'Dealer wins!'
+    } else {
+      return 'Draw!'
+    }
   }
 
   const handleRound = () => {
@@ -173,7 +233,11 @@ const App: React.FC = () => {
       ) : (
         <>
           <header className='flex items-center justify-center w-4/5 mb-10'>
-            <Dealer cards={dealerCards} />
+            <Dealer
+              cards={dealer.cards}
+              score={dealer.score}
+              dealerTurn={dealerTurn}
+            />
           </header>
           {!roundStarted && (
             <button
@@ -183,7 +247,7 @@ const App: React.FC = () => {
               Start round
             </button>
           )}
-          <main className='grid w-4/5 grid-cols-2 gap-2 mb-10'>
+          <main className='flex items-center justify-center w-4/5 mb-10'>
             <Player
               name={player.name}
               cards={player.cards}
@@ -191,6 +255,7 @@ const App: React.FC = () => {
               bet={playerBet}
               score={player.score}
               actions={{ hit, stand, double, surrender }}
+              dealerTurn={!dealerTurn}
             />
           </main>
         </>

@@ -4,6 +4,8 @@ import { DeckCard } from '../utils/deck'
 
 export interface DealerProps {
   cards: DeckCard[]
+  score: number
+  dealerTurn: boolean
 }
 
 const Dealer: React.FC<DealerProps> = (props) => {
@@ -17,7 +19,7 @@ const Dealer: React.FC<DealerProps> = (props) => {
           <Card
             key={index}
             card={card.value}
-            facingUp={index === 0 ? true : false}
+            facingUp={index === 0 || props.dealerTurn ? true : false}
           />
         ))}
       </section>
